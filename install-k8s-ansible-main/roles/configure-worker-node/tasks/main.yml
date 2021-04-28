@@ -1,3 +1,0 @@
----
-- name: Join the cluster
-  command: kubeadm join  {{ k8s_join_options }} {{ K8S_MASTER_INTERNAL_IP }}:6443

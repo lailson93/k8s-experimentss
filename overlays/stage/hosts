@@ -4,7 +4,6 @@ k8s-master ansible_host=
 [node]
 k8s-node-01 ansible_host=
 
-
 [k3s-cluster:children]
 master
 node

@@ -2,6 +2,7 @@
 - name: Setup Commons Prerequisite
   hosts:
     - node
+    - master
   gather_facts: yes
   roles:
     - { role: prereq-setup }
@@ -27,6 +28,15 @@
   tags:
     - k8smain
 
+- name: Getting cluster info
+  hosts:
+    - master
+  gather_facts: yes
+  roles:
+    - { role: getting-cluster-info }
+  tags:
+    - addnode
+
 - name: Add Worker Node
   hosts:
     - node
@@ -35,3 +45,13 @@
     - { role: configure-worker-node }
   tags:
     - addnode
+
+### deprecated !
+- name: Add features like Dashboard, ingress, etc
+  hosts:
+    - master
+  gather_facts: yes
+  roles:
+    - { role: features }
+  tags:
+    - addfeatures

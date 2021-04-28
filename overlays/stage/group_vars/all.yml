@@ -1,7 +1,7 @@
 ansible_user: "centos"
 # systemd_dir: /etc/systemd/system
 # master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
-docker_version: 20.10.6
+docker_version: 19.03.15
 
 k8s_version: "1.19.10-0"
 k8s_packages:
@@ -14,9 +14,9 @@ k8s_network_cidr: "10.244.0.0/16"
 k8s_prefliht_ignore: "all"
 k8s_init_options: "--pod-network-cidr={{ k8s_network_cidr }} --ignore-preflight-errors={{ k8s_prefliht_ignore }}"
 k8s_flannel_yml: "https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
-# https://raw.githubusercontent.com/coreos/flannel/62e44c867a2846fefb68bd5f178daf4da3095ccb/Documentation/kube-flannel.yml"
 
 ### node vars
 k8s_join_token: "--token={{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
 k8s_join_hash: "--discovery-token-ca-cert-hash sha256:{{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}"
+master_internal_ip: "{{ hostvars['K8S_TOKEN_HOLDER']['ip'] }}"
 k8s_join_options: "{{ k8s_join_token }} {{ k8s_join_hash }}"

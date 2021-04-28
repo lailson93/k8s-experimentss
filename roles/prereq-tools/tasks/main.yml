@@ -50,3 +50,34 @@
 - name: Downgrade Kubelet to version {{k8s_version}}
   become: yes
   shell: yum -y downgrade kubelet-{{k8s_version}}
+
+### Configure docker as container runtime
+- name: Configuring Docker as Container Runtime
+  become: yes
+  shell: |
+    cat <<EOF | sudo tee /etc/docker/daemon.json
+    {
+      "exec-opts": ["native.cgroupdriver=systemd"],
+      "log-driver": "json-file",
+      "log-opts": {
+        "max-size": "100m"
+      },
+      "storage-driver": "overlay2"
+    }
+    EOF
+
+- name: Enable Docker
+  become: yes
+  shell: systemctl enable docker
+
+- name: Reload Daemon
+  become: yes
+  shell: systemctl daemon-reload
+
+- name: Restart Docker
+  become: yes
+  shell: systemctl restart docker
+
+- name: Enable Kubelet
+  become: yes
+  shell: systemctl enable kubelet

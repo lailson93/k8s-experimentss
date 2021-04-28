@@ -21,6 +21,8 @@ You will install these packages on all of your machines, using `tools`'s tag fro
 ```
 ansible-playbook -i overlays/stage/hosts site.yml --tags "setup"
 ansible-playbook -i overlays/stage/hosts site.yml --tags "tools"
+ansible-playbook -i overlays/stage/hosts site.yml --tags "k8smain"
+ansible-playbook -i overlays/stage/hosts site.yml --tags "addnode"
 ```
 
 ### references

@@ -1,0 +1,7 @@
+---
+# - hosts: master
+#   tasks:
+
+- name: Join the cluster
+  become: yes
+  command: kubeadm join  {{ k8s_join_options }} {{ master_internal_ip }}:6443

@@ -1,0 +1,38 @@
+---
+- name: Get cluster token
+  shell: kubeadm token list | cut -d ' ' -f1 | sed -n '2p'
+  register: K8S_TOKEN
+
+- name: Get cluster CA Hash
+  shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: K8S_CA_HASH
+
+- name: Get cluster master IP
+  shell: hostname -i
+  register: K8S_MASTER_INTERNAL_IP
+
+- name: Save token and hash
+  add_host:
+    name: "K8S_TOKEN_HOLDER"
+    token: "{{ K8S_TOKEN.stdout }}"
+    hash: "{{ K8S_CA_HASH.stdout }}"
+    ip: "{{ K8S_MASTER_INTERNAL_IP.stdout }}"
+
+- name: Check saved token
+  debug:
+    msg: "[Master] K8S_TOKEN_HOLDER K8S token is {{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
+
+- name: Check saved hash
+  debug:
+    msg: "[Master] K8S_TOKEN_HOLDER K8S Hash is  {{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}"
+
+- name: Check saved ip
+  debug:
+    msg: "[Master] K8S_TOKEN_HOLDER K8S Master IP is  {{ hostvars['K8S_TOKEN_HOLDER']['ip'] }}"
+# - name: Get cluster master IP
+#   shell: hostname -i
+#   register: K8S_MASTER_INTERNAL_IP
+
+# - name: Export K8S_MASTER_INTERNAL_IP
+#   set_fact:
+#     k8s_master_internal_ip: "{{K8S_MASTER_INTERNAL_IP.stdout}}"

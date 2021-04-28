@@ -1,0 +1,13 @@
+[master]
+k8s-master ansible_host=54.167.110.125
+
+[node]
+k8s-node-01 ansible_host=54.146.96.106
+
+
+[k3s-cluster:children]
+master
+node
+
+[groups:vars]
+ansible_user=centos

@@ -1,0 +1,55 @@
+---
+- name: Initializing the cluster
+  become: yes
+  command: kubeadm init {{ k8s_init_options }}
+
+- name: Ensure .kube directory exists
+  file:
+    path: ~/.kube
+    state: directory
+
+- name: Get user uid
+  command: id -u
+  register: USER
+
+- name: Get user group id
+  command: id -g
+  register: GROUP
+
+- name: Copy config file for user
+  become: yes
+  copy:
+    remote_src: yes
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    owner: "{{ USER.stdout }}"
+    group: "{{ GROUP.stdout }}"
+
+## modify it !
+- name: Configure Flannel
+  command: kubectl apply -f {{ k8s_flannel_yml }}
+
+### search it! mas acho q n precisa dessa etapa!! tendo em vista q vamos ter apenas um MASTER.
+- name: Remove pod schedule restriction for master node
+  command: kubectl taint nodes --all node-role.kubernetes.io/master-
+
+- name: Get cluster token
+  shell: kubeadm token list | cut -d ' ' -f1 | sed -n '2p'
+  register: K8S_TOKEN
+
+- name: Get cluster CA Hash
+  shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: K8S_CA_HASH
+
+- name: Save token and hash
+  add_host:
+    name: "K8S_TOKEN_HOLDER"
+    token: "{{ K8S_TOKEN.stdout }}"
+    hash: "{{ K8S_CA_HASH.stdout }}"
+
+- name: Check saved token
+  debug:
+    msg: "[Master] K8S_TOKEN_HOLDER K8S token is {{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
+- name: Check saved hash
+  debug:
+    msg: "[Master] K8S_TOKEN_HOLDER K8S Hash is  {{ hostvars['K8S_TOKEN_HOLDER']['hash'] }}"

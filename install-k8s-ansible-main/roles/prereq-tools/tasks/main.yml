@@ -1,0 +1,52 @@
+---
+- name: Add Docker Repository
+  become: true
+  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: Install Docker
+  yum:
+    name:
+      - "docker-ce-{{ docker_version }}"
+      - "docker-ce-cli-{{ docker_version }}"
+      - containerd.io
+  state: present
+  become: yes
+
+- name: Ensure group "docker" exists
+  group:
+    name: docker
+    state: present
+  become: yes
+
+- name: Add user {{ansible_user}} to docker group
+  user:
+    name: "{{ansible_user}}"
+    groups: docker
+    append: yes
+  become: yes
+
+- name: start Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Install kubernetes rpm repository
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes repository for packages
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+  become: true
+
+- name: Install Kubernetes packages
+  become: yes
+  shell: yum install -y {{ item }}
+  with_items: "{{ k8s_packages }}"
+
+- name: Downgrade Kubelet to version {{k8s_version}}
+  become: yes
+  shell: yum -y downgrade kubelet-{{k8s_version}}

@@ -1,0 +1,37 @@
+---
+- name: Setup Commons Prerequisite
+  hosts:
+    - node
+  gather_facts: yes
+  roles:
+    - { role: prereq-setup }
+  tags:
+    - setup
+
+- name: Tools Prerequisite
+  hosts:
+    - master
+    - node
+  gather_facts: yes
+  roles:
+    - { role: prereq-tools }
+  tags:
+    - tools
+
+- name: Configure Main Node
+  hosts:
+    - master
+  gather_facts: yes
+  roles:
+    - { role: configure-main-node }
+  tags:
+    - k8smain
+
+- name: Add Worker Node
+  hosts:
+    - node
+  gather_facts: yes
+  roles:
+    - { role: configure-worker-node }
+  tags:
+    - addnode

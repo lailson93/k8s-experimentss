@@ -3,7 +3,8 @@ K8S PLAYBOOK
 
 ### INtro
 
-k8s v1.19.10
+k8s: v1.19.10
+docker: 19.03.15 
 
 You will install these packages on all of your machines, using `tools`'s tag from this playbook:
 - kubeadm: the command to bootstrap the cluster.

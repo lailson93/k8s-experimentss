@@ -15,6 +15,7 @@ You will install these packages on all of your machines, using `tools`'s tag fro
 - Ansible 2.6.5
 - python 2.7
 - Access passwordless
+- TPC and UDP ports open between all hosts
 
 
 ### how to

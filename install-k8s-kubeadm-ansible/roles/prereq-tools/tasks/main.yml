@@ -2,35 +2,56 @@
 - name: Add Docker Repository
   become: true
   shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Install Docker
-  yum:
-    name:
-      - "docker-ce-{{ docker_version }}"
-      - "docker-ce-cli-{{ docker_version }}"
-      - containerd.io
-  state: present
-  become: yes
+  become: true
+  shell: yum -y install "docker-ce-{{ docker_version }}" "docker-ce-cli-{{ docker_version }}" containerd.io
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Add Docker GPG apt Key
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Get HOst lsb_release
+  become: true
+  shell: lsb_release -cs
+  register: LSB
+
+- name: Add Docker Repository
+  become: true
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ LSB.stdout }} stable
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Install Docker
+  become: true
+  shell: apt install -y docker-ce={{ docker_version }}{{ LSB.stdout }} docker-ce-cli={{ docker_version }}{{ LSB.stdout }} containerd.io
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Ensure group "docker" exists
   group:
     name: docker
     state: present
-  become: yes
+  become: true
 
 - name: Add user {{ansible_user}} to docker group
   user:
     name: "{{ansible_user}}"
     groups: docker
     append: yes
-  become: yes
+  become: true
 
 - name: start Docker
   service:
     name: docker
     state: started
     enabled: yes
-  become: yes
+  become: true
 
 - name: Install kubernetes rpm repository
   yum_repository:
@@ -41,15 +62,38 @@
     repo_gpgcheck: yes
     gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
   become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Add Kubernetes GPG apt Key
+  become: true
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Add Kubernetes Repository
+  become: true
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Install Kubernetes packages
-  become: yes
-  shell: yum install -y {{ item }}
+  become: true
+  shell: yum install -y {{ item }}-{{ k8s_version }}
   with_items: "{{ k8s_packages }}"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Downgrade Kubelet to version {{k8s_version}}
-  become: yes
+  become: true
   shell: yum -y downgrade kubelet-{{k8s_version}}
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Install Kubernetes packages
+  become: true
+  shell: apt install -y --allow-downgrades {{ item }}={{ k8s_version }}
+  with_items: "{{ k8s_packages }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 ### Configure docker as container runtime
 - name: Configuring Docker as Container Runtime

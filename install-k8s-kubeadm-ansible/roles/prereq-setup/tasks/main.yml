@@ -1,21 +1,23 @@
 ---
-# - name: Update system
-#   become: true
-#   shell: yum -y update
+- name: Update system
+  become: true
+  shell: yum -y update
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Update system
+  become: true
+  shell: apt -y update
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Ensuring basic requirement and dependencies
   become: yes
-  yum:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - wget
-      - git
-      - curl
-      - net-tools
-      - bind-utils
-      - yum-utils
-    state: present
+  shell: yum -y install wget vim git curl net-tools bind-utils yum-utils libselinux-python
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Ensuring basic requirement and dependencies
+  become: true
+  shell: apt -y install wget vim git curl net-tools apt-transport-https ca-certificates gnupg lsb-release
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Set SELinux to disabled state
   become: yes

@@ -1,13 +1,13 @@
-ansible_user: "centos"
-# systemd_dir: /etc/systemd/system
-# master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
-docker_version: 19.03.15
+#19.03.15
+ansible_user: "ubuntu"
 
-k8s_version: "1.19.10-0"
+docker_version: "5:19.03.15~3-0~ubuntu-"
+## 1.19.10-0 para centos
+k8s_version: "1.19.10-00"
 k8s_packages:
-  - "kubectl-{{ k8s_version }}"
-  - "kubeadm-{{ k8s_version }}"
-  - "kubelet-{{ k8s_version }}"
+  - "kubectl"
+  - "kubeadm"
+  - "kubelet"
 
 ## master vars
 k8s_network_cidr: "10.244.0.0/16"

@@ -59,7 +59,7 @@ $ ansible-playbook -i overlays/stage/hosts site.yml --tags "k8smain" -e ansible_
 $ ansible-playbook -i overlays/stage/hosts site.yml --tags "addnode" -e ansible_python_interpreter="/usr/bin/python2"
 ```
 
-### otptional to redhat 8
+### otptional: passing the python path when it needed
 
 You have to specify the python path when running the ansible-playbook command as it follows:
 
